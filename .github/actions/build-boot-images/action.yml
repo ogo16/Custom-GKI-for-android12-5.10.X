@@ -66,6 +66,6 @@ runs:
             "$MKBOOTIMG" --header_version 4 --kernel "$kernel_image" --output "$output_image"
           fi
 
-          "$AVBTOOL" add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image "$output_image" --algorithm SHA256_RSA2048 --key "$BOOT_SIGN_KEY_PATH"
+          #"$AVBTOOL" add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image "$output_image" --algorithm SHA256_RSA2048 --key "$BOOT_SIGN_KEY_PATH"
           cp "$output_image" "$GITHUB_WORKSPACE/boot-artifacts/${FILE_NAME}-${output_image}"
         done
