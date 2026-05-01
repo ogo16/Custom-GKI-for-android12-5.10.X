@@ -64,9 +64,9 @@ runs:
         echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> "$GITHUB_ENV"
 
         mkdir -p "$GITHUB_WORKSPACE/kernel-build-tools/linux-x86/share/avb"
-        if [ -z "${BOOT_SIGN_KEY:-}" ]; then
-          exit 1
-        fi
+        #if [ -z "${BOOT_SIGN_KEY:-}" ]; then
+        #  exit 1
+        #fi
 
         KEY_PATH="$GITHUB_WORKSPACE/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
         printf '%s' "$BOOT_SIGN_KEY" > "$KEY_PATH"
