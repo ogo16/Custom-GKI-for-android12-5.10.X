@@ -84,23 +84,11 @@ jobs:
         os_patch_level: ${{ steps.parse.outputs.os_patch_level }}
         use_repo: ${{ inputs.use_repo }}
 
-    - name: Grep for vm_flags_clear after download
-      run: |
-        grep -n 'vm_flags_clear' ${{ github.workspace }}/kernel/common/mm/mmap.c || echo 'Not found'
-
     - name: Extract Sublevel and Set File Name
       id: extract
       uses: ./.github/actions/extract-sublevel-file-name
       with:
         variant: ${{ inputs.variant }}
-
-    - name: Kernel Fixes
-      uses: ./.github/actions/kernel-fixes
-      with:
-        android_version: ${{ steps.parse.outputs.android_version }}
-        kernel_version: ${{ steps.parse.outputs.kernel_version }}
-        sublevel: ${{ steps.extract.outputs.sublevel }}
-        os_patch_level: ${{ steps.parse.outputs.os_patch_level }}
 
     - name: Setup KernelSU-Next
       if: contains(inputs.feature_set, 'KSUN') || inputs.feature_set == 'FULL'
@@ -117,10 +105,6 @@ jobs:
         os_patch_level: ${{ steps.parse.outputs.os_patch_level }}
         sublevel: ${{ steps.extract.outputs.sublevel }}
         susfs_commit: ${{ inputs.susfs_commit }}
-
-    - name: Baseband Guard
-      if: contains(inputs.feature_set, 'BBG') || inputs.feature_set == 'FULL'
-      uses: ./.github/actions/bbg
 
     - name: Setup Networking
       if: contains(inputs.feature_set, 'NET') || inputs.feature_set == 'FULL'
@@ -146,31 +130,6 @@ jobs:
       uses: ./.github/actions/module-check-bypass
       with:
         kernel_version: ${{ steps.parse.outputs.kernel_version }}
-
-    - name: Apply Device-Specific Patches
-      uses: ./.github/actions/apply-device-patches
-      with:
-        kernel_version: ${{ steps.parse.outputs.kernel_version }}
-
-    - name: Apply ABI Compare Bypass
-      if: false
-      working-directory: ${{ github.workspace }}/kernel
-      run: |
-        # ABI compare bypass per kernel/android version
-        # Edit each block as needed per version
-        if [[ "$ANDROID_VERSION" == "android12" && "$KERNEL_VERSION" == "5.10" ]]; then
-          sed -i 's/^\s*exit 1$/    echo "Who Cares? Bypassing Now!"/' build/abi/compare_to_symbol_list
-        elif [[ "$ANDROID_VERSION" == "android13" && "$KERNEL_VERSION" == "5.10" ]]; then
-          sed -i 's/^\s*exit 1$/    echo "Who Cares? Bypassing Now!"/' build/kernel/abi/compare_to_symbol_list
-        elif [[ "$ANDROID_VERSION" == "android13" && "$KERNEL_VERSION" == "5.15" ]]; then
-          sed -i 's/^\s*exit 1$/    echo "Who Cares? Bypassing Now!"/' build/kernel/abi/compare_to_symbol_list
-        elif [[ "$ANDROID_VERSION" == "android14" && "$KERNEL_VERSION" == "5.15" ]]; then
-          perl -i -pe 's/^(\s*)return 1$/$1print("Who Cares? Bypassing Now!")\n$1return 0/g if /if missing_symbols:/../return 1/' build/kernel/abi/check_buildtime_symbol_protection.py
-        elif [[ "$ANDROID_VERSION" == "android14" && "$KERNEL_VERSION" == "6.1" ]]; then
-          perl -i -pe 's/^(\s*)return 1$/$1print("Who Cares? Bypassing Now!")\n$1return 0/g if /if missing_symbols:/../return 1/' build/kernel/abi/check_buildtime_symbol_protection.py
-        elif [[ "$ANDROID_VERSION" == "android15" && "$KERNEL_VERSION" == "6.6" ]]; then
-          perl -i -pe 's/^(\s*)return 1$/$1print("Who Cares? Bypassing Now!")\n$1return 0/g if /if missing_symbols:/../return 1/' build/kernel/abi/check_buildtime_symbol_protection.py
-        fi
 
     - name: Apply Kernel Branding
       uses: ./.github/actions/apply-kernel-branding
